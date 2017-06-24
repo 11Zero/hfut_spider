@@ -62,7 +62,7 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'kr.pipelines.JsonWriterPipeline': 300,
+    'kr.pipelines.KrPipeline': 300,#JsonWriterPipeline
     #'kr.pipelines.MySQLStorePipeline': 301,
 }
 

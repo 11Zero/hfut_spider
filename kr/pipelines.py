@@ -8,32 +8,75 @@
 #from scrapy.exception import DropItem
 import codecs
 import json
+import xlwt
+from collections import OrderedDict
+from openpyxl import Workbook
+from scrapy import signals
+from scrapy.contrib.exporter import CsvItemExporter
+from pyexcel_xls import get_data
+from pyexcel_xls import save_data
 from datetime import datetime
 from hashlib import md5
-from scrapy import log
+
 from twisted.enterprise import adbapi
 
 
 class JsonWriterPipeline(object):
+    wb = Workbook()
+    ws = wb.active
+    ws.append(['time', 'title', 'url'])  # 设置表头
 
-    def __init__(self):
-        self.file = codecs.open('ans.json', 'wb', encoding='utf-8')
+    # data = OrderedDict()
+    # sheet_1 = []
+    # row_1_data = [u"time", u"title", u"url"]  # 每一行的数据
+    # table = data.add_sheet('name',cell_overwrite_ok=True)
+    # def __init__(self):
+    #     self.file = Workbook()
+    #     self.file.active.append(['time', 'title', 'url'])  # 设置表头
+        # self.ws.append(['time', 'title', 'url'])  # 设置表头
+        # self.sheet_1.append(self.row_1_data)
+        # self.file = codecs.open('ans.json', 'wb', encoding='utf-8')
 
     def process_item(self, item, spider):
-        line = json.dumps(dict(item), ensure_ascii=False) + "\r\n"
-        self.file.write(line)
+        line = [item['pub_date'], item['title'], item['url']]
+        self.ws.append(line)
+        # self.wb.save('f.xlsx')
+        # print line
+        # self.file.active.append(line)  # 将数据以行的形式添加到xlsx中
+        # self.file.save('test.xlsx')  # 保存xlsx文件
+        # line = json.dumps(dict(item), ensure_ascii=False) + "\r\n"
+        # self.file.write(line)
+        # row_data = [item['pub_date'],item['title'],item['url']]
+        # self.sheet_1.append(row_data)
+        # self.data.update({u"表1": self.sheet_1})
         return item
 
-    def spider_closed(self, spider):
-        self.file.close()
+    # def spider_closed(self, spider):
+        self.file.save('test.xlsx')
+        # self.file.close()
+        # self.data.save('test.xls')
 
         #file = codecs.open('ans.json', 'wb', encoding='utf-8')
 
 
 class KrPipeline(object):
+    # @classmethod
+    def __init__(self):
+        self.file = open('output.csv', 'w+b')
+        self.exporter = CsvItemExporter(self.file)
+
+    def spider_opened(self, spider):
+        self.exporter.start_exporting()
+
+    def spider_closed(self, spider):
+        self.exporter.finish_exporting()
+        self.file.close()
 
     def process_item(self, item, spider):
+        self.exporter.export_item(item)
         return item
+    # def process_item(self, item, spider):
+    #     return item
 
 
 # class MySQLStorePipeline(object):
