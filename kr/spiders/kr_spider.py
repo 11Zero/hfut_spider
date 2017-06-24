@@ -17,7 +17,6 @@ import scrapy
 
 class krSpider(CrawlSpider):
     name = 'kr'
-
     allowed_domains = ['hfut.edu.cn']
     start_urls = ['http://news.hfut.edu.cn/list-2-1.html']
 
@@ -52,7 +51,8 @@ class krSpider(CrawlSpider):
                 item['url'] = url
             item['pub_date'] = li.xpath('./span/text()').extract()
             if item is not None:
-                yield item#items.append(item)
+                yield item
+                #items.append(item)
                 # print items
 
 
@@ -67,34 +67,6 @@ class krSpider(CrawlSpider):
             next_page = response.urljoin(nexturl)
             # 回调parse处理下一页的url
             yield scrapy.Request(next_page, callback=self.parse)
-
-
-    def detail(self, response):
-        #urlparse.urljoin(response.url, 'http://news.hfut.edu.cn/')
-        sel = Selector(response)
-        this_li = sel.xpath('/html/body/div[5]/div[1]/ul/li')
-        items = []
-        for li in this_li:
-            item = KrItem()
-            item['title'] = li.xpath('./a/text()').extract()
-            if len(item['title']) == 0:
-                continue
-            # item['author'] = site.xpath(
-            #     '//div[@class="inner"]//span[@class="name"]/text()').extract()
-            # item['intro_content'] = site.xpath(
-            #     '//section[@class="article"]/p[1]').extract()
-
-            url = li.xpath('./a/@href').extract()[0]
-
-            if url[0] == '/':
-                item['url'] = 'http://news.hfut.edu.cn' + url
-            else:
-                item['url'] = url
-            item['pub_date'] = li.xpath('./span/text()').extract()
-            if item not in items:
-                items.append(item)
-                # print items
-        return items
 
 
 # process = CrawlerProcess({
